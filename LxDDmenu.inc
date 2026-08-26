@@ -19,7 +19,20 @@
     window.stack_js = stack_js;
 [[/script]]
 
-<!-- 4. Load the compiled React Application and styles -->
+<!-- 4. Import Map to resolve all bare specifiers -->
+[[script type="importmap"]]
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+    "react-katex": "https://esm.sh/react-katex@3.0.1?deps=react@18.3.1,react-dom@18.3.1",
+    "lucide-react": "https://esm.sh/lucide-react@0.428.0?deps=react@18.3.1"
+  }
+}
+[[/script]]
+
+<!-- 5. Load the compiled React Application and styles -->
 [[style src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"]][[/style]]
 
 [[style]]
@@ -28,7 +41,7 @@
 [[/style]]
 
 [[script type="module"]]
-import ie,{useState as _,useRef as ce,useEffect as z,StrictMode as ue}from 'https://esm.sh/react@18.3.1';import{createRoot as pe}from 'https://esm.sh/react-dom@18.3.1/client';import{InlineMath as Z,BlockMath as me}from 'https://esm.sh/react-katex@3.0.1?external=react,react-dom';import{Check as B,X as se,ChevronDown as de}from 'https://esm.sh/lucide-react@0.428.0?external=react';(function(){const c=document.createElement("link").relList;if(c&&c.supports&&c.supports("modulepreload"))return;for(const a of document.querySelectorAll('link[rel="modulepreload"]'))u(a);new MutationObserver(a=>{for(const s of a)if(s.type==="childList")for(const b of s.addedNodes)b.tagName==="LINK"&&b.rel==="modulepreload"&&u(b)}).observe(document,{childList:!0,subtree:!0});function m(a){const s={};return a.integrity&&(s.integrity=a.integrity),a.referrerPolicy&&(s.referrerPolicy=a.referrerPolicy),a.crossOrigin==="use-credentials"?s.credentials="include":a.crossOrigin==="anonymous"?s.credentials="omit":s.credentials="same-origin",s}function u(a){if(a.ep)return;a.ep=!0;const s=m(a);fetch(a.href,s)}})();var G={exports:{}},K={},Q;function fe(){if(Q)return K;Q=1;/**
+import ie,{useState as _,useRef as ce,useEffect as z,StrictMode as ue}from"react";import{createRoot as pe}from"react-dom/client";import{InlineMath as Z,BlockMath as me}from"react-katex";import{Check as B,X as se,ChevronDown as de}from"lucide-react";(function(){const c=document.createElement("link").relList;if(c&&c.supports&&c.supports("modulepreload"))return;for(const a of document.querySelectorAll('link[rel="modulepreload"]'))u(a);new MutationObserver(a=>{for(const s of a)if(s.type==="childList")for(const b of s.addedNodes)b.tagName==="LINK"&&b.rel==="modulepreload"&&u(b)}).observe(document,{childList:!0,subtree:!0});function m(a){const s={};return a.integrity&&(s.integrity=a.integrity),a.referrerPolicy&&(s.referrerPolicy=a.referrerPolicy),a.crossOrigin==="use-credentials"?s.credentials="include":a.crossOrigin==="anonymous"?s.credentials="omit":s.credentials="same-origin",s}function u(a){if(a.ep)return;a.ep=!0;const s=m(a);fetch(a.href,s)}})();var G={exports:{}},K={},Q;function fe(){if(Q)return K;Q=1;/**
  * @license React
  * react-jsx-dev-runtime.development.js
  *

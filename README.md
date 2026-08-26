@@ -16,55 +16,43 @@ Follow these steps to deploy this to your STACK questions.
 4. Look in the root of the project folder. You will find a newly generated file called **`SINGLE_FILE_FOR_STACK.html`**. 
 
 ## Step 2: Setup your STACK Question Variables
-In your STACK question, define the Maxima variables that power the component. You must stringify them into JSON using STACK's `stack_json_stringify` function.
+In your STACK question, define the Maxima variables that power the component. You must stringify them into JSON using STACK's `stackjson_stringify` function.
 
 **Example Maxima Code:**
 ```maxima
-/* The correct answers in order */
-tas: ["KMnO4", "HCl", "MnCl2", "H2O", "10"];
-js_tas: stack_json_stringify(tas);
-
-/* The dropdown options. 
-   Pass a 2D array to give different options to different dropdowns. 
-   Pass an empty list [] for inputs. */
-options: [
-    [ ["id", "HCl"], ["latex", "HCl"] ],  
-    [ ["id", "KMnO4"], ["latex", "KMnO_4"] ],
-    /* ... add options for the rest of your dropdowns here ... */
-    [] /* Empty list for the text input */
+/* The items format is:
+   [ Title, [Options...], Correct_Position (1-based index), Type, Weight ] */
+items: [
+    ["החומר המחמצן", ["KMnO4", "HCl", "MnCl2", "H2O"], 1, "dropdown", 1],
+    ["החומר המחזר", ["KMnO4", "HCl", "MnCl2", "H2O"], 2, "dropdown", 1],
+    ["תוצר החמצון", ["MnCl2", "H2O", "KCl", "Cl2"], 4, "dropdown", 1],
+    ["תוצר החיזור", ["MnCl2", "H2O", "KCl", "Cl2"], 1, "dropdown", 1],
+    ["מספר מולי אלקטרונים", ["10"], 1, "input", 1]
 ];
-js_options: stack_json_stringify(options);
 
-/* The labels for the right side (Hebrew RTL) */
-titles: ["החומר המחמצן", "החומר המחזר", "תוצר החמצון", "תוצר החיזור", "מספר מולי אלקטרונים"];
-js_titles: stack_json_stringify(titles);
+js_items: stackjson_stringify(items);
 
-/* The type of input for each row ("dropdown" or "input") */
-types: ["dropdown", "dropdown", "dropdown", "dropdown", "input"];
-js_types: stack_json_stringify(types);
-
-/* The weights for each input. 
-   If not provided, the component will assume all inputs have an equal weight of 1. */
-weights: [1, 1, 1, 1, 1];
-js_weights: stack_json_stringify(weights);
-
-/* The names of the STACK input variables. 
+/* The name of the STACK input variable. 
    Defaults to "ans1" if not provided, but you can change it here 
    if you have multiple components on the same page. */
-js_input_ans: stack_json_stringify("ans1");
+js_input_ans: stackjson_stringify("ans1");
+
+/* Define the Teacher Answer (ta) list to use as the model answer.
+   The list contains the answers array (1-based index for dropdowns, exact text for inputs)
+   and the normalized grade 1. */
+ta: [ [1, 2, 4, 1, "10"], 1 ];
 ```
 
 ## Step 3: Paste the HTML into your Question Text
 1. Open the **`SINGLE_FILE_FOR_STACK.html`** file that was generated in Step 1.
 2. Copy its entire contents.
 3. Paste everything directly into your STACK **Question text** field. That's it!
-
 *(Note: The file uses version-locked CDNs to load React and KaTeX, making the text incredibly lightweight and taking advantage of browser caching so your quizzes load instantly.)*
 
 ## Step 4: Configure the Input in STACK
 Scroll down to the **Input: ans1** section in your STACK question settings and configure it as follows:
 - **Input type**: `String`
-- **Model answer**: `stack_json_stringify([tas, 1])` *(This tells STACK what the perfect JSON output looks like)*
+- **Model answer**: `stackjson_stringify(ta)` *(This evaluates the Teacher Answer list defined in your question variables)*
 - **Student must verify**: `No`
 - **Show the validation**: `No`
 
@@ -76,16 +64,21 @@ Scroll down to the **Input: ans1** section in your STACK question settings and c
 ```
 
 ## Step 5: Setup PRT (Grading)
-The React component automatically normalizes the grade to a number between `0` and `1` and includes it in the JSON string. Maxima will automatically parse this JSON into a list. 
-- `ans1[1]` will be the list of student answers.
-- `ans1[2]` will be the calculated numeric grade (0 to 1).
+The React component normalizes the grade to a number between `0` and `1` and outputs it alongside the answers as a JSON array string. In STACK, you must parse this JSON string back into a Maxima list before you can grade it.
 
-Configure your **Potential response tree (PRT)** node as follows to apply this grade:
+In your **Potential response tree (PRT)**, scroll down to the **Feedback variables** and add this line:
+```maxima
+parsed_ans1: stackjson_parse(ans1);
+```
+- `parsed_ans1[1]` will be the Maxima list of student answers.
+- `parsed_ans1[2]` will be the calculated numeric grade (0 to 1).
+
+You can now configure your PRT node to evaluate this grade directly:
 - **Answer Test**: `AlgEquiv`
-- **SAns**: `ans1[2]`
+- **SAns**: `parsed_ans1[2]`
 - **TAns**: `1`
 - **Node 1 True feedback**: 
   - Score: `1`
 - **Node 1 False feedback**: 
-  - Score: `ans1[2]` *(This assigns the partial credit calculated by the React app)*
+  - Score: `parsed_ans1[2]` *(This assigns the partial credit calculated by the React app)*
 

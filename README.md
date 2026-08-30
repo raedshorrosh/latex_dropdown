@@ -18,16 +18,24 @@ Follow these steps to deploy this to your STACK questions.
 ## Step 2: Setup your STACK Question Variables
 In your STACK question, define the Maxima variables that power the component. You must stringify them into JSON using STACK's `stackjson_stringify` function.
 
+**Title Formatting (Markdown, Newlines, & LaTeX):**
+The `Title` field in the items array supports Markdown-style formatting and LaTeX math! 
+*(Note: Moodle's security filter automatically strips raw HTML tags like `<b>` or `<br>` from Maxima strings, so you must use these alternative syntaxes instead):*
+- **Bold text:** Wrap your text in double asterisks: `"**מספר מולי**"`
+- **Line breaks:** Use a double-escaped newline in your Maxima string: `"First line \\n Second line"`
+- **LaTeX Math:** Because STACK auto-replaces `$` signs (and Maxima strings require escaping), you **must double-escape** STACK's math delimiters inside your item strings: `"\\( KMnO_4 \\)"`.
+- **Dropdown Options:** Options inside the dropdown array are *automatically* rendered as LaTeX! You do not need to wrap them in `\\( ... \\)`. Simply write the raw math (e.g., `"KMnO_4"`).
+
 **Example Maxima Code:**
 ```maxima
 /* The items format is:
    [ Title, [Options...], Correct_Position (1-based index), Type, Weight ] */
 items: [
-    ["החומר המחמצן", ["KMnO4", "HCl", "MnCl2", "H2O"], 1, "dropdown", 1],
-    ["החומר המחזר", ["KMnO4", "HCl", "MnCl2", "H2O"], 2, "dropdown", 1],
-    ["תוצר החמצון", ["MnCl2", "H2O", "KCl", "Cl2"], 4, "dropdown", 1],
-    ["תוצר החיזור", ["MnCl2", "H2O", "KCl", "Cl2"], 1, "dropdown", 1],
-    ["מספר מולי אלקטרונים", ["10"], 1, "input", 1]
+    ["החומר המחמצן \\[KMnO_4\\]", ["KMnO_4", "HCl", "MnCl_2", "H_2O"], 1, "dropdown", 1],
+    ["החומר המחזר", ["KMnO_4", "HCl", "MnCl_2", "H_2O"], 2, "dropdown", 1],
+    ["תוצר החמצון", ["MnCl_2", "H_2O", "KCl", "Cl_2"], 4, "dropdown", 1],
+    ["תוצר החיזור", ["MnCl_2", "H_2O", "KCl", "Cl_2"], 1, "dropdown", 1],
+    ["**מספר מולי** \\n אלקטרונים שעוברים", ["10"], 1, "input", 1]
 ];
 
 js_items: stackjson_stringify(items);
@@ -42,6 +50,11 @@ js_input_ans: stackjson_stringify("ans1");
    and the normalized grade 1. */
 ta: [ [1, 2, 4, 1, "10"], 1 ];
 ```
+
+**Understanding the `Weight` Parameter:**
+The 5th value in the item array (e.g., the `1` at the end of the lists above) is the **Weight** of that specific question.
+- The React app uses this weight to calculate the relative value of each question when determining the student's overall score (weighted average) for the visual grade indicator in the UI. 
+- For example, if a question has a weight of `2`, getting it right contributes twice as much to the visual score as a question with a weight of `1`.
 
 ## Step 3: Paste the HTML into your Question Text
 1. Open the **`SINGLE_FILE_FOR_STACK.html`** file that was generated in Step 1.

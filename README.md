@@ -45,10 +45,17 @@ js_items: stackjson_stringify(items);
    if you have multiple components on the same page. */
 js_input_ans: stackjson_stringify("ans1");
 
-/* Define the Teacher Answer (ta) list to use as the model answer.
-   The list contains the answers array (1-based index for dropdowns, exact text for inputs)
-   and the normalized grade 1. */
-ta: [ [1, 2, 4, 1, "10"], 1 ];
+/* Automatically extract the Teacher Answer (ta) list from the items array to use as the model answer. */
+extracted_answers: makelist(
+    if is(row[4] = "dropdown") then 
+        row[3]     /* Take the 3rd item if it's a dropdown */
+    else 
+        row[2][1], /* Take the 1st element of the 2nd item list if it's an input */
+    row, items
+);
+
+/* Construct the final 'ta' variable with the trailing 1 */
+ta: [extracted_answers, 1];
 ```
 
 **Understanding the `Weight` Parameter:**

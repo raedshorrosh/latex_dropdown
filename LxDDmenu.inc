@@ -1,4 +1,4 @@
-[[iframe width="100%" height="450px"]]
+[[iframe width="100%" height="500px"]]
 <!-- 1. The hidden variables injected by STACK Maxima -->
 <div style="display: none;">
     <div id="data-items">{#js_items#}</div>

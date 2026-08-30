@@ -46,10 +46,10 @@ js_items: stackjson_stringify(items);
 js_input_ans: stackjson_stringify("ans1");
 
 /* Set direction to RTL (true) or LTR (false). Defaults to true for Hebrew/Arabic. */
-js_rtl: stackjson_stringify(true);
+js_rtl: true;
 
 /* Control the app height in pixels to ensure it fits perfectly in STACK */
-js_height: stackjson_stringify(500);
+js_height: 550;
 
 /* Automatically extract the Teacher Answer (ta) list from the items array to use as the model answer. */
 extracted_answers: makelist(

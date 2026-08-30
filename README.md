@@ -45,6 +45,12 @@ js_items: stackjson_stringify(items);
    if you have multiple components on the same page. */
 js_input_ans: stackjson_stringify("ans1");
 
+/* Set direction to RTL (true) or LTR (false). Defaults to true for Hebrew/Arabic. */
+js_rtl: stackjson_stringify(true);
+
+/* Control the app height in pixels to ensure it fits perfectly in STACK */
+js_height: stackjson_stringify(500);
+
 /* Automatically extract the Teacher Answer (ta) list from the items array to use as the model answer. */
 extracted_answers: makelist(
     if is(row[4] = "dropdown") then 
@@ -84,7 +90,9 @@ Scroll down to the **Input: ans1** section in your STACK question settings and c
 ```
 
 ## Step 5: Setup PRT (Grading)
-The React component normalizes the grade to a number between `0` and `1` and outputs it alongside the answers as a JSON array string. In STACK, you must parse this JSON string back into a Maxima list before you can grade it.
+**Note on Grading:** The React app handles all of the marking locally (including partial credit and weighting). It returns a normalized grade (a number between `0` and `1`) directly to STACK alongside the student's answers in a JSON array.
+
+In STACK, you simply parse this JSON string back into a Maxima list before you grade it.
 
 In your **Potential response tree (PRT)**, scroll down to the **Feedback variables** and add this line:
 ```maxima

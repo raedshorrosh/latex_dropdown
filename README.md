@@ -1,7 +1,6 @@
 # How to Use the Math Dropdown Component in STACK
 
-This project uses React and KaTeX, which means it needs to be "compiled" before it can be used in Moodle. 
-We have set it up to generate a single, lightweight HTML file that you can paste directly into Moodle—no external servers required!
+This project uses React and KaTeX, which means it needs to be "compiled" before it can be used in Moodle. We have set it up to generate a single, lightweight HTML file that you can paste directly into Moodle—no external servers required!
 
 Follow these steps to deploy this to your STACK questions.
 
@@ -19,39 +18,51 @@ Follow these steps to deploy this to your STACK questions.
 In your STACK question, define the Maxima variables that power the component. You must stringify them into JSON using STACK's `stackjson_stringify` function.
 
 **Title Formatting (Markdown, Newlines, & LaTeX):**
-The `Title` field in the items array supports Markdown-style formatting and LaTeX math! 
-*(Note: Moodle's security filter automatically strips raw HTML tags like `<b>` or `<br>` from Maxima strings, so you must use these alternative syntaxes instead):*
+The `Title` field in the items array supports Markdown-style formatting and LaTeX math! *(Note: Moodle's security filter automatically strips raw HTML tags like `<b>` or `<br>` from Maxima strings, so you must use these alternative syntaxes instead):*
 - **Bold text:** Wrap your text in double asterisks: `"**מספר מולי**"`
 - **Line breaks:** Use a double-escaped newline in your Maxima string: `"First line \\n Second line"`
 - **LaTeX Math:** Because STACK auto-replaces `$` signs (and Maxima strings require escaping), you **must double-escape** STACK's math delimiters inside your item strings: `"\\( KMnO_4 \\)"`.
 - **Dropdown Options:** Options inside the dropdown array are *automatically* rendered as LaTeX! You do not need to wrap them in `\\( ... \\)`. Simply write the raw math (e.g., `"KMnO_4"`).
 
 **Example Maxima Code:**
-```maxima
-/* The items format is:
-   [ Title, [Options...], Correct_Position (1-based index), Type, Weight ] */
-items: [
-    ["החומר המחמצן \\[KMnO_4\\]", ["KMnO_4", "HCl", "MnCl_2", "H_2O"], 1, "dropdown", 1],
-    ["החומר המחזר", ["KMnO_4", "HCl", "MnCl_2", "H_2O"], 2, "dropdown", 1],
-    ["תוצר החמצון", ["MnCl_2", "H_2O", "KCl", "Cl_2"], 4, "dropdown", 1],
-    ["תוצר החיזור", ["MnCl_2", "H_2O", "KCl", "Cl_2"], 1, "dropdown", 1],
-    ["**מספר מולי** \\n אלקטרונים שעוברים", ["10"], 1, "input", 1]
-];
 
-js_items: stackjson_stringify(items);
+```maxima
+/* Set direction to RTL (true) or LTR (false). Defaults to true for Hebrew/Arabic. */
+js_rtl: true;
+
+/* Custom placeholder text for dropdowns and inputs (defaults to "יש לבחור..." if RTL, "Choose..." if LTR) */
+js_placeholder: stackjson_stringify("Choose...");
+
+/* Control the app height in pixels to ensure it fits perfectly in STACK */
+js_height: 620;
+
+/* Option to enable or disable option shuffling for dropdowns internally in the React App */
+js_shuffle: true;
 
 /* The name of the STACK input variable. 
    Defaults to "ans1" if not provided, but you can change it here 
    if you have multiple components on the same page. */
-js_input_ans: stackjson_stringify("ans1");
+js_input_ans: stackjson_stringify("lxdd");
 
-/* Set direction to RTL (true) or LTR (false). Defaults to true for Hebrew/Arabic. */
-js_rtl: true;
+/* The overall grade/weight for this STACK input component */
+ta_grade: 1;
 
-/* Control the app height in pixels to ensure it fits perfectly in STACK */
-js_height: 550;
+common: ["KMnO_4", "HCl", "MnCl_2", "H_2O", "Cl_2", "KCl"];
 
-/* Automatically extract the Teacher Answer (ta) list from the items array to use as the model answer. */
+/* The items format is:
+   [ Title, [Options...], Correct_Position (1-based index), Type, Weight ] */
+items: [
+    ["החומר המחמצן", common, 1, "dropdown", 1],
+    ["החומר המחזר", common, 2, "dropdown", 1],
+    ["תוצר החמצון", common, 5, "dropdown", 1],
+    ["תוצר החיזור", common, 3, "dropdown", 1],
+    ["מספר מולי אלקטרונים\\n שעוברים בתגובה המאוזנת", ["10"], 1, "input", 1]
+];
+
+/* Proceed with the standard variable generations */
+js_items: stackjson_stringify(items);
+
+/* Extract the answers based on the type of question */
 extracted_answers: makelist(
     if is(row[4] = "dropdown") then 
         row[3]     /* Take the 3rd item if it's a dropdown */
@@ -60,8 +71,8 @@ extracted_answers: makelist(
     row, items
 );
 
-/* Construct the final 'ta' variable with the trailing 1 */
-ta: [extracted_answers, 1];
+/* Construct the final teacher answer 'Tans' variable using the dynamically extracted answers */
+Tans: [extracted_answers, ta_grade];
 ```
 
 **Understanding the `Weight` Parameter:**
@@ -76,16 +87,18 @@ The 5th value in the item array (e.g., the `1` at the end of the lists above) is
 *(Note: The file uses version-locked CDNs to load React and KaTeX, making the text incredibly lightweight and taking advantage of browser caching so your quizzes load instantly.)*
 
 ## Step 4: Configure the Input in STACK
-Scroll down to the **Input: ans1** section in your STACK question settings and configure it as follows:
+Scroll down to the **Input: lxdd** section in your STACK question settings and configure it as follows:
+
 - **Input type**: `String`
-- **Model answer**: `stackjson_stringify(ta)` *(This evaluates the Teacher Answer list defined in your question variables)*
+- **Model answer**: `stackjson_stringify(Tans)` *(This evaluates the Teacher Answer list defined in your question variables)*
 - **Student must verify**: `No`
 - **Show the validation**: `No`
 
 *Important to Hide the Input:* Since the React app handles the UI, you should hide the default STACK input box. In your Question Text (from Step 3), wrap the input tags in a hidden div like this:
+
 ```html
 <div style="display:none;">
-    [[input:ans1]] [[validation:ans1]]
+    [[input:lxdd]] [[validation:lxdd]]
 </div>
 ```
 
@@ -95,18 +108,19 @@ Scroll down to the **Input: ans1** section in your STACK question settings and c
 In STACK, you simply parse this JSON string back into a Maxima list before you grade it.
 
 In your **Potential response tree (PRT)**, scroll down to the **Feedback variables** and add this line:
+
 ```maxima
-parsed_ans1: stackjson_parse(ans1);
+parsed_lxdd: stackjson_parse(lxdd);
 ```
-- `parsed_ans1[1]` will be the Maxima list of student answers.
-- `parsed_ans1[2]` will be the calculated numeric grade (0 to 1).
+
+- `parsed_lxdd[1]` will be the Maxima list of student answers.
+- `parsed_lxdd[2]` will be the calculated numeric grade (0 to 1).
 
 You can now configure your PRT node to evaluate this grade directly:
 - **Answer Test**: `AlgEquiv`
-- **SAns**: `parsed_ans1[2]`
+- **SAns**: `parsed_lxdd[2]`
 - **TAns**: `1`
 - **Node 1 True feedback**: 
   - Score: `1`
 - **Node 1 False feedback**: 
-  - Score: `parsed_ans1[2]` *(This assigns the partial credit calculated by the React app)*
-
+  - Score: `parsed_lxdd[2]` *(This assigns the partial credit calculated by the React app)*
